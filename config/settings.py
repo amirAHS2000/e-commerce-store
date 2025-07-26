@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-8!ld4jcwib4%a(ona^-@v@v@=-tl5y7^2$j-%w3%fcfbx7&8%d"
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', "django-insecure-8!ld4jcwib4%a(ona^-@v@v@=-tl5y7^2$j-%w3%fcfbx7&8%d")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True' # Load from env, default to False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') # Load from env
 
 
 # Application definition
@@ -84,9 +84,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': 'db', # This is the service name from docker-compose.yml
+        'PORT': '5432',
     }
 }
 
@@ -120,11 +124,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -177,9 +176,27 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
 
-CELERY_BROKER_URL = 'redis://redis:6379/0' # Default Redis URL (Docker service name)
-CELERY_RESULT_BACKEND = 'django-db' # Store results in Django database
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0') # Default Redis URL (Docker service name)
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'django-db') # Store results in Django database
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
+
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / 'staticfiles' # Where 'collectstatic' will put files
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media' # Where user-uploaded files will go
+
+# Add this to config/urls.py for serving media files in development
+# from django.conf import settings
+# from django.conf.urls.static import static
+# urlpatterns = [
+#     # ... your existing URL patterns
+# ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+#
+# This will be added later when we start defining URLs and need to serve media.

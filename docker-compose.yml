@@ -1,0 +1,48 @@
+# docker-compose.yml
+
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck: # Healthcheck to ensure DB is ready before app connects
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379" # Expose Redis port if you need to connect from host
+
+  app:
+    build: .
+    command: sh -c "python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy # Wait for db healthcheck to pass
+      redis:
+        condition: service_started
+    # For hot-reloading (optional, but convenient for development)
+    # You might need to install 'watchdog' in your venv for some setups
+    # command: sh -c "pip install watchdog && python manage.py runserver 0.0.0.0:8000"
+    # environment:
+    #   DJANGO_DEBUG: "True" # Example of setting debug for app container
+    #   DJANGO_SETTINGS_MODULE: "config.settings"
+    #   # ... any other settings you want to pass
+
+volumes:
+  postgres_data:
