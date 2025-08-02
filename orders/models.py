@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import UniqueConstraint
+from django.db.models import Sum, F
+
+from decimal import Decimal
 
 from products.models import Product
 
@@ -18,6 +21,17 @@ class Cart(models.Model):
     def __str__(self):
         return f"Cart for {self.user.username} (Active: {self.is_active})"
     
+    # def get_total_price(self):
+    #     total = Decimal('0.00')
+    #     for item in self.items.all():
+    #         total += item.get_total_price()
+    #     return total
+    
+    # Optimized version for get_total_price function (using aggregation)
+    def get_total_price(self):
+        total = self.items.aggregate(total_price=Sum(F('quantity') * F('price'), output_field=models.DecimalField()))['total_price']
+        return total if total is not None else Decimal('0.00')
+
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
@@ -61,6 +75,21 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.id} by {self.user.username} - Status: {self.get_status_display()}"
+
+    # def calculate_total_price(self):
+    #     total = Decimal('0.00')
+    #     for item in self.items.all():
+    #         total += item.get_total_price()
+    #     return total
+    
+    # Optimized version of above function
+    def calculate_total_price(self):
+        total = self.items.aggregate(total_price=Sum(F('quantity') * F('price'), output_field=models.DecimalField()))['total_price']
+        return total if total is not None else Decimal('0.00')
+
+    def save(self, *args, **kwargs):
+        self.total_price = self.calculate_total_price()
+        super().save(*args, **kwargs)
 
 
 class OrderItem(models.Model):
