@@ -87,9 +87,9 @@ class Order(models.Model):
         total = self.items.aggregate(total_price=Sum(F('quantity') * F('price'), output_field=models.DecimalField()))['total_price']
         return total if total is not None else Decimal('0.00')
 
-    def save(self, *args, **kwargs):
-        self.total_price = self.calculate_total_price()
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+        # self.total_price = self.calculate_total_price()
+        # super().save(*args, **kwargs)
 
 
 class OrderItem(models.Model):
