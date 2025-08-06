@@ -31,6 +31,9 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def get_featured_image(self):
+        return self.images.filter(is_featured=True).first()
 
 
 class ProductImage(models.Model):

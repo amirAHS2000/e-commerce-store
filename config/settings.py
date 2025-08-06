@@ -27,6 +27,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True' # Load from env, defau
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') # Load from env
 
+LOGIN_URL = '/accounts/login/'
 
 # Application definition
 
@@ -65,13 +66,16 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.media",
+                "django.template.context_processors.static",
             ],
         },
     },
@@ -186,11 +190,11 @@ CELERY_TIMEZONE = 'UTC'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / 'staticfiles' # Where 'collectstatic' will put files
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media' # Where user-uploaded files will go
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Add this to config/urls.py for serving media files in development
 # from django.conf import settings

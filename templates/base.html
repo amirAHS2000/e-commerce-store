@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My E-commerce Site{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Example static file link #}
+    {# You can add more CSS, meta tags, etc. here #}
+</head>
+<body>
+    <header>
+        <h1><a href="{% url 'products:product_list' %}">E-commerce Shop</a></h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'products:product_list' %}">Products</a></li>
+                {# Add links for cart, login/logout later #}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {# Page-specific content will go here #}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 My E-commerce Site</p>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script> {# Example static file link #}
+    {# You can add more JavaScript files here #}
+</body>
+</html>

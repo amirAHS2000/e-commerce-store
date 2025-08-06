@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Product List{% endblock %}
+
+{% block content %}
+    <h2>All Products</h2>
+    <div class="product-list-container">
+        {% for product in products %}
+            <div class="product-card">
+                <h3><a href="{% url 'products:product_detail' slug=product.slug %}">{{ product.name }}</a></h3>
+                <p>Price: ${{ product.price }}</p>
+                {# Display featured image using the new model method #}
+                {% with featured_image=product.get_featured_image %} {# Call the model method here #}
+                    {% if featured_image %}
+                        <img src="{{ featured_image.image.url }}" alt="{{ featured_image.alt_text }}" style="max-width: 200px; height: auto;">
+                    {% else %}
+                        <p>No featured image available</p>
+                    {% endif %}
+                {% endwith %}
+                <p>{{ product.description|truncatechars:100 }}</p>
+                <a href="{% url 'products:product_detail' slug=product.slug %}">View Details</a>
+            </div>
+        {% empty %}
+            <p>No active products available.</p>
+        {% endfor %}
+    </div>
+{% endblock %}
