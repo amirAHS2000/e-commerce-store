@@ -46,7 +46,7 @@
             </tbody>
         </table>
         <h3>Cart Total: ${{ cart.get_total_price }}</h3>
-        <a href="#">Proceed to Checkout</a>
+        <a href="{% url 'orders:checkout' %}">Proceed to Checkout</a>
     {% else %}
         <p>Your cart is empty.</p>
     {% endif %}

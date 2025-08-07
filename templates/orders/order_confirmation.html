@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.id }} Confirmation{% endblock %}
+
+{% block content %}
+    <h1>Order Confirmation</h1>
+    <p>Thank you for your order, {{ order.user.username }}!</p>
+
+    <h3>Order #{{ order.id }} Details</h3>
+    <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y" }}</p>
+    <p><strong>Status:</strong> {{ order.status }}</p>
+
+    <h3>Items</h3>
+    <table border="1" style="width: 100%;">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Item Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items.all %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.price }}</td>
+                    <td>${{ item.get_total_price }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No items found for this order.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Order Total: ${{ order.total_price }}</h3>
+    <p><strong>Shipping Address:</strong> {{ order.shipping_address|linebreaksbr }}</p>
+    <p><strong>Billing Address:</strong> {{ order.billing_address|linebreaksbr }}</p>
+
+    <br>
+    <p><a href="{% url 'products:product_list' %}">Continue Shopping</a></p>
+{% endblock %}

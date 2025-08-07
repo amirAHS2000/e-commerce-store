@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+    {% include 'messages.html' %}
+    <h2>Checkout</h2>
+    
+    <h3>Order Summary</h3>
+    <table border="1" style="width: 100%;">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart.items.all %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>${{ item.price }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.get_total_price }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" style="text-align: right;"><strong>Cart Total:</strong></td>
+                <td><strong>${{ cart.get_total_price }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <h3>Shipping & Billing Details</h3>
+    <form action="{% url 'orders:checkout' %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Place Order</button>
+    </form>
+    
+    <p><a href="{% url 'orders:view_cart' %}">Return to Cart</a></p>
+{% endblock %}

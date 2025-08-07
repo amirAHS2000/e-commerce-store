@@ -1,10 +1,12 @@
-from .models import Cart, CartItem, Product
+from .models import Cart, CartItem, OrderItem, Order
+from products.models import Product 
+from .forms import OrderForm
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_GET
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 
 def _get_or_create_cart(user):
@@ -85,3 +87,58 @@ def update_cart_item(request, item_id):
         messages.error(request, 'Quantity not provided.')
     
     return redirect('orders:view_cart')
+
+@login_required
+def checkout(request):
+    cart = _get_or_create_cart(request.user)
+
+    if not cart.items.exists():
+        messages.warning(request, 'Your cart is empty.')
+        return redirect('orders:view_cart')
+    
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                # create the Order object
+                order = form.save(commit=False)
+                order.user = request.user
+                order.total_price = cart.get_total_price()
+                order.status = 'PENDING'
+                order.save()
+
+                # create OrderItems from CartItems
+                for cart_item in cart.items.all():
+                    OrderItem.objects.create(
+                        order=order,
+                        product=cart_item.product,
+                        quantity=cart_item.quantity,
+                        price=cart_item.price
+                    )
+
+                    # update Inventory
+                    # TODO
+
+                # deactivate the cart
+                cart.is_active = False
+                cart.save()
+
+            messages.success(request, 'Your order has been placed!')
+            return redirect('orders:order_confirmation', order_id=order.id)        
+    else: # GET request
+        form = OrderForm()
+
+    context = {
+        'cart': cart,
+        'form': form,
+    }
+    return render(request, 'orders/checkout.html', context)
+
+@login_required
+def order_confirmation(request, order_id):
+    # fetch the order, ensuring it belongs to the logged-in user
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
+    context = {
+        'order': order,
+    }
+    return render(request, 'orders/order_confirmation.html', context)
