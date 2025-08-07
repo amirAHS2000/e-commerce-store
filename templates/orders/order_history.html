@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Order History{% endblock %}
+
+{% block content %}
+    <h1>My Order History</h1>
+
+    {% if orders %}
+        <table border="1" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Total Price</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.created_at|date:"F d, Y" }}</td>
+                        <td>{{ order.status }}</td>
+                        <td>${{ order.total_price }}</td>
+                        <td><a href="{% url 'orders:order_confirmation' order_id=order.id %}">View Order</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>You have not placed any orders yet.</p>
+    {% endif %}
+{% endblock %}

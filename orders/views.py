@@ -135,6 +135,16 @@ def checkout(request):
     return render(request, 'orders/checkout.html', context)
 
 @login_required
+def order_history(request):
+    # fetch all orders for the current user
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+
+    context = {
+        'orders': orders
+    }
+    return render(request, 'orders/order_history.html', context)
+
+@login_required
 def order_confirmation(request, order_id):
     # fetch the order, ensuring it belongs to the logged-in user
     order = get_object_or_404(Order, pk=order_id, user=request.user)
