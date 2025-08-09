@@ -30,8 +30,8 @@ You need to have **Docker** and **Docker Compose** installed on your system.
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/your-username/your-repository-name.git](https://github.com/your-username/your-repository-name.git)
-    cd your-repository-name
+    git clone https://github.com/amirAHS2000/e-commerce-store.git
+    cd e-commerce-store
     ```
 
 2.  **Build and run the containers:**
